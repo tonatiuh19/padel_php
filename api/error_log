@@ -1,0 +1,8 @@
+[04-Nov-2024 21:11:38 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined function getMediaFiles() in /home3/alanchat/garbrix.com/padel/api/getPlatformFieldsById.php:64
+Stack trace:
+#0 {main}
+  thrown in /home3/alanchat/garbrix.com/padel/api/getPlatformFieldsById.php on line 64
+[04-Nov-2024 21:11:50 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined function getMediaFiles() in /home3/alanchat/garbrix.com/padel/api/getPlatformFieldsById.php:64
+Stack trace:
+#0 {main}
+  thrown in /home3/alanchat/garbrix.com/padel/api/getPlatformFieldsById.php on line 64
