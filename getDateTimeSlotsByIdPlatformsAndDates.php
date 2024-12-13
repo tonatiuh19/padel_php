@@ -33,7 +33,26 @@ if ($method == 'POST') {
         }
         $stmt->close();
 
-        echo json_encode($data);
+        // Query to fetch marked dates with the specified filters
+        $sql = "SELECT a.id_platforms_disabled_date, a.start_date_time, a.end_date_time, a.active 
+                FROM platforms_disabled_dates as a
+                INNER JOIN platforms_fields as b on b.id_platforms_field = a.id_platforms_field
+                WHERE b.id_platform = ? AND a.start_date_time BETWEEN ? AND ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iss", $id_platforms, $start_date, $end_date);
+        $stmt->execute();
+        $markedDatesResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        $markedDates = transformMarkedDates($markedDatesResult);
+
+        // Structure the response
+        $response = [
+            'data' => $data,
+            'markedDates' => $markedDates
+        ];
+
+        echo json_encode($response);
     } else {
         echo json_encode(["message" => "Invalid input data"]);
     }
@@ -42,4 +61,26 @@ if ($method == 'POST') {
 }
 
 $conn->close();
+
+function transformMarkedDates($markedDatesResult)
+{
+    $transformed = [];
+
+    foreach ($markedDatesResult as $date) {
+        $dateKey = explode(' ', $date['start_date_time'])[0];
+        $dotColor = $date['active'] == 1 ? 'red' : 'blue';
+
+        $transformed[$dateKey] = [
+            'marked' => true,
+            'dotColor' => $dotColor,
+            'activeOpacity' => 0,
+            'id_platforms_disabled_date' => $date['id_platforms_disabled_date'],
+            'start_date_time' => $date['start_date_time'],
+            'end_date_time' => $date['end_date_time'],
+            'active' => $date['active']
+        ];
+    }
+
+    return $transformed;
+}
 ?>
