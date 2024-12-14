@@ -34,7 +34,7 @@ if ($method == 'POST') {
         $stmt->close();
 
         // Query to fetch marked dates with the specified filters
-        $sql = "SELECT a.id_platforms_disabled_date, a.start_date_time, a.end_date_time, a.active 
+        $sql = "SELECT a.id_platforms_disabled_date, a.start_date_time, a.end_date_time, a.active, b.title, b.id_platforms_field
                 FROM platforms_disabled_dates as a
                 INNER JOIN platforms_fields as b on b.id_platforms_field = a.id_platforms_field
                 WHERE b.id_platform = ? AND a.start_date_time BETWEEN ? AND ?";
@@ -44,7 +44,23 @@ if ($method == 'POST') {
         $markedDatesResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
 
-        $markedDates = transformMarkedDates($markedDatesResult);
+        // Process marked dates into an array
+        $markedDates = [];
+        foreach ($markedDatesResult as $date) {
+            $dotColor = $date['active'] == 1 ? 'red' : 'blue';
+
+            $markedDates[] = [
+                'marked' => true,
+                'dotColor' => $dotColor,
+                'activeOpacity' => 0,
+                'id_platforms_disabled_date' => $date['id_platforms_disabled_date'],
+                'id_platforms_field' => $date['id_platforms_field'],
+                'start_date_time' => $date['start_date_time'],
+                'end_date_time' => $date['end_date_time'],
+                'active' => $date['active'],
+                'title' => $date['title']
+            ];
+        }
 
         // Structure the response
         $response = [
@@ -61,26 +77,4 @@ if ($method == 'POST') {
 }
 
 $conn->close();
-
-function transformMarkedDates($markedDatesResult)
-{
-    $transformed = [];
-
-    foreach ($markedDatesResult as $date) {
-        $dateKey = explode(' ', $date['start_date_time'])[0];
-        $dotColor = $date['active'] == 1 ? 'red' : 'blue';
-
-        $transformed[$dateKey] = [
-            'marked' => true,
-            'dotColor' => $dotColor,
-            'activeOpacity' => 0,
-            'id_platforms_disabled_date' => $date['id_platforms_disabled_date'],
-            'start_date_time' => $date['start_date_time'],
-            'end_date_time' => $date['end_date_time'],
-            'active' => $date['active']
-        ];
-    }
-
-    return $transformed;
-}
 ?>
