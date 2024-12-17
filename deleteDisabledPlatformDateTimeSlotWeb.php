@@ -9,16 +9,16 @@ if ($method == 'POST') {
     $requestBody = file_get_contents('php://input');
     $params = json_decode($requestBody, true);
 
-    if (isset($params['id_platforms_date_time_slot']) && isset($params['start_date']) && isset($params['end_date']) && isset($params['id_platforms'])) {
-        $id_platforms_date_time_slot = $params['id_platforms_date_time_slot'];
+    if (isset($params['id_platforms_disabled_date']) && isset($params['id_platforms']) && isset($params['start_date']) && isset($params['end_date'])) {
+        $id_platforms_disabled_date = $params['id_platforms_disabled_date'];
+        $id_platforms = $params['id_platforms'];
         $start_date = $params['start_date'] . ' 00:00:00';
         $end_date = $params['end_date'] . ' 23:59:59';
-        $id_platforms = $params['id_platforms'];
 
-        // Update the validated field to 1 in the database
-        $sql = "UPDATE `platforms_date_time_slots` SET `validated` = 1 WHERE `id_platforms_date_time_slot` = ?";
+        // Delete the record from the platforms_disabled_dates table
+        $sql = "DELETE FROM `platforms_disabled_dates` WHERE `id_platforms_disabled_date` = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id_platforms_date_time_slot);
+        $stmt->bind_param("i", $id_platforms_disabled_date);
 
         if ($stmt->execute()) {
             $stmt->close();
@@ -81,7 +81,7 @@ if ($method == 'POST') {
 
             echo json_encode($response);
         } else {
-            echo json_encode(["message" => "Failed to update data"]);
+            echo json_encode(["message" => "Failed to delete data"]);
         }
     } else {
         echo json_encode(["message" => "Invalid input data"]);
