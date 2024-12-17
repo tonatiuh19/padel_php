@@ -23,10 +23,11 @@ if ($method == 'POST') {
             $stmt->close();
 
             // Query to fetch data with the specified filters
-            $sql = "SELECT a.id_platforms_date_time_slot, a.id_platforms_field, a.id_platforms_user, a.platforms_date_time_start, a.platforms_date_time_end, a.active, a.validated, b.full_name, b.date_of_birth, b.email 
-                    FROM platforms_date_time_slots as a
-                    INNER JOIN platforms_users as b on a.id_platforms_user = b.id_platforms_user
-                    WHERE a.platforms_date_time_start BETWEEN ? AND ?";
+            $sql = "SELECT a.id_platforms_date_time_slot, a.id_platforms_field, a.id_platforms_user, a.platforms_date_time_start, a.platforms_date_time_end, a.active, a.validated, b.full_name, b.date_of_birth, b.email, c.title
+            FROM platforms_date_time_slots as a
+            INNER JOIN platforms_users as b on a.id_platforms_user = b.id_platforms_user
+            INNER JOIN platforms_fields as c on a.id_platforms_field = c.id_platforms_field
+            WHERE a.platforms_date_time_start BETWEEN ? AND ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ss", $start_date, $end_date);
             $stmt->execute();
@@ -62,6 +63,7 @@ if ($method == 'POST') {
                     'activeOpacity' => 0,
                     'id_platforms_disabled_date' => $date['id_platforms_disabled_date'],
                     'id_platforms_field' => $date['id_platforms_field'],
+                    'title' => $date['title'],
                     'start_date_time' => $date['start_date_time'],
                     'end_date_time' => $date['end_date_time'],
                     'active' => $date['active'],
@@ -87,4 +89,3 @@ if ($method == 'POST') {
 }
 
 $conn->close();
-?>

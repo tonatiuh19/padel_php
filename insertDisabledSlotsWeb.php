@@ -9,25 +9,21 @@ if ($method == 'POST') {
     $requestBody = file_get_contents('php://input');
     $params = json_decode($requestBody, true);
 
-    if (isset($params['id_platforms_date_time_slot']) && isset($params['start_date']) && isset($params['end_date'])) {
-        $id_platforms_date_time_slot = $params['id_platforms_date_time_slot'];
+    if (isset($params['id_platforms_field']) && isset($params['active']) && isset($params['start_date']) && isset($params['end_date'])) {
+        $id_platforms_field = $params['id_platforms_field'];
+        $active = $params['active'];
         $start_date = $params['start_date'] . ' 00:00:00';
         $end_date = $params['end_date'] . ' 23:59:59';
+        $now = date("Y-m-d H:i:s");
 
-        // Insert the deactivated slot information into platforms_date_time_slots_deleted
-        $sql = "INSERT INTO platforms_date_time_slots_deleted (id_platforms_date_time_slot, platforms_date_time_start, platforms_date_time_end, id_platforms_user, date)
-                SELECT id_platforms_date_time_slot, platforms_date_time_start, platforms_date_time_end, id_platforms_user, NOW()
-                FROM platforms_date_time_slots
-                WHERE id_platforms_date_time_slot = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id_platforms_date_time_slot);
-        $stmt->execute();
-        $stmt->close();
+        $start_date_time = $params['start_date_time'];
+        $end_date_time = $params['end_date_time'];
 
-        // Delete the record from the database
-        $sql = "DELETE FROM `platforms_date_time_slots` WHERE `id_platforms_date_time_slot` = ?";
+        // Insert the disabled slot into the database
+        $sql = "INSERT INTO platforms_disabled_dates (id_platforms_field, start_date_time, end_date_time, active) 
+                VALUES (?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id_platforms_date_time_slot);
+        $stmt->bind_param("issi", $id_platforms_field, $start_date_time, $end_date_time, $active);
 
         if ($stmt->execute()) {
             $stmt->close();
@@ -73,7 +69,6 @@ if ($method == 'POST') {
                     'activeOpacity' => 0,
                     'id_platforms_disabled_date' => $date['id_platforms_disabled_date'],
                     'id_platforms_field' => $date['id_platforms_field'],
-                    'title' => $date['title'],
                     'start_date_time' => $date['start_date_time'],
                     'end_date_time' => $date['end_date_time'],
                     'active' => $date['active'],
@@ -89,7 +84,7 @@ if ($method == 'POST') {
 
             echo json_encode($response);
         } else {
-            echo json_encode(["message" => "Failed to delete data"]);
+            echo json_encode(["message" => "Failed to insert disabled slot"]);
         }
     } else {
         echo json_encode(["message" => "Invalid input data"]);
