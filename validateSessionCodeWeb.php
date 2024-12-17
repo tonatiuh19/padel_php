@@ -56,10 +56,12 @@ if ($method == 'POST') {
             $stmt->execute();
             $stmt->close();
 
-            // Fetch and return the user data
-            $sql = "SELECT id_platforms_user, full_name, age, date_of_birth, email, phone_number, phone_number_code, stripe_id, type, date_created, id_platforms 
-                    FROM platforms_users 
-                    WHERE id_platforms_user = ?";
+            // Fetch and return the user data along with platform info
+            $sql = "SELECT a.id_platforms_user, a.full_name, a.age, a.date_of_birth, a.email, a.phone_number, a.phone_number_code, a.stripe_id, a.type, a.date_created, a.id_platforms,
+                           b.id_platform, b.title, b.start_time, b.end_time
+                    FROM platforms_users as a
+                    INNER JOIN platforms as b on a.id_platforms = b.id_platform
+                    WHERE a.id_platforms_user = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $id_platforms_user);
             $stmt->execute();
@@ -78,4 +80,3 @@ if ($method == 'POST') {
 }
 
 $conn->close();
-?>
