@@ -80,7 +80,7 @@ if ($method == 'POST') {
             // Fetch the last reservation for the specified user
             $sql = "SELECT a.id_platforms_date_time_slot, a.id_platforms_field, a.id_platforms_user, a.platforms_date_time_start, a.platforms_date_time_end, a.active, a.stripe_id, a.validated 
             FROM platforms_date_time_slots as a
-            WHERE a.validated = 0 AND a.id_platforms_user = ? AND a.platforms_date_time_start > NOW()
+            WHERE a.validated = 0 AND a.active = 1 AND a.id_platforms_user = ? AND a.platforms_date_time_start > NOW()
             ORDER BY a.platforms_date_time_start ASC LIMIT 1";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $id_platforms_user);
