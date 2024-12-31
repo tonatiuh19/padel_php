@@ -26,11 +26,14 @@ if ($method == 'POST') {
         $endDateTime->modify('+1 hour 30 minutes');
         $platforms_date_time_end = $endDateTime->format('Y-m-d H:i:s');
 
+        // Get current date and time for platforms_date_time_inserted
+        $platforms_date_time_inserted = (new DateTime())->format('Y-m-d H:i:s');
+
         // Insert data into platforms_date_time_slots
-        $sql = "INSERT INTO platforms_date_time_slots (id_platforms_field, id_platforms_user, platforms_date_time_start, platforms_date_time_end, active, validated) 
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO platforms_date_time_slots (id_platforms_field, id_platforms_user, platforms_date_time_start, platforms_date_time_end, active, validated, platforms_date_time_inserted) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iissii", $id_platforms_field, $id_platforms_user, $platforms_date_time_start, $platforms_date_time_end, $active, $validated);
+        $stmt->bind_param("iississ", $id_platforms_field, $id_platforms_user, $platforms_date_time_start, $platforms_date_time_end, $active, $validated, $platforms_date_time_inserted);
 
         if ($stmt->execute()) {
             $stmt->close();
@@ -102,3 +105,4 @@ if ($method == 'POST') {
 }
 
 $conn->close();
+?>

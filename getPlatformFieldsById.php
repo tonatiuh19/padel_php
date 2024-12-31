@@ -16,7 +16,7 @@ if ($method == 'POST') {
         $id_platforms_user = $params['id_platforms_user'];
 
         $cleanupSql = "DELETE FROM platforms_date_time_slots 
-                       WHERE active = 2 AND platforms_date_time_start < NOW() - INTERVAL 3 MINUTE";
+        WHERE active = 2 AND platforms_date_time_inserted < NOW() - INTERVAL 3 MINUTE";
         $conn->query($cleanupSql);
 
         // Fetch platform details

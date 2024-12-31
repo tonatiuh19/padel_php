@@ -15,6 +15,10 @@ if ($method == 'POST') {
         $start_date = $params['start_date'] . ' 00:00:00';
         $end_date = $params['end_date'] . ' 23:59:59';
 
+        $cleanupSql = "DELETE FROM platforms_date_time_slots 
+        WHERE active = 2 AND platforms_date_time_inserted < NOW() - INTERVAL 3 MINUTE";
+        $conn->query($cleanupSql);
+
         // Query to fetch data with the specified filters
         $sql = "SELECT a.id_platforms_date_time_slot, a.id_platforms_field, a.id_platforms_user, a.platforms_date_time_start, a.platforms_date_time_end, a.active, a.validated, b.full_name, b.date_of_birth, b.email, c.title
                 FROM platforms_date_time_slots as a
