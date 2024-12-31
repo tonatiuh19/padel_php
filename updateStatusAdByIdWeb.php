@@ -18,11 +18,26 @@ if ($method == 'POST') {
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("ii", $active, $id_platforms_ad);
         if ($stmt->execute()) {
-            echo json_encode(["message" => "Ad updated successfully"]);
+            $stmt->close(); // Close the statement after update
+
+            // Fetch all ads for the specified platform with active = 1 or 2
+            $sql = "SELECT a.id_platforms_ad, a.id_platform, a.platforms_ad_title, a.platforms_ad_image, a.active 
+                    FROM platforms_ads as a 
+                    WHERE a.id_platform = (SELECT id_platform FROM platforms_ads WHERE id_platforms_ad = ?) AND a.active IN (1, 2)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $id_platforms_ad);
+            $stmt->execute();
+            $adsResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+            // Structure the response
+            $response = $adsResult;
+            $res = json_encode($response, JSON_NUMERIC_CHECK);
+            header('Content-type: application/json; charset=utf-8');
+            echo $res;
         } else {
             echo json_encode(["message" => "Failed to update ad"]);
         }
-        $stmt->close();
     } else {
         echo json_encode(["message" => "Invalid input data"]);
     }

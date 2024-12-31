@@ -1,5 +1,5 @@
-[30-Dec-2024 21:07:56 America/Mexico_City] PHP Fatal error:  Uncaught Error: mysqli_stmt object is already closed in /home3/alanchat/garbrix.com/padel/api/insertAdWeb.php:72
+[30-Dec-2024 22:02:46 America/Mexico_City] PHP Fatal error:  Uncaught Error: mysqli_stmt object is already closed in /home3/alanchat/garbrix.com/padel/api/updateStatusAdByIdWeb.php:39
 Stack trace:
-#0 /home3/alanchat/garbrix.com/padel/api/insertAdWeb.php(72): mysqli_stmt->close()
+#0 /home3/alanchat/garbrix.com/padel/api/updateStatusAdByIdWeb.php(39): mysqli_stmt->close()
 #1 {main}
-  thrown in /home3/alanchat/garbrix.com/padel/api/insertAdWeb.php on line 72
+  thrown in /home3/alanchat/garbrix.com/padel/api/updateStatusAdByIdWeb.php on line 39
