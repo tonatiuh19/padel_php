@@ -1,1 +1,5 @@
-[24-Dec-2024 00:49:16 America/Mexico_City] Mailer Error (Contact): SMTP Error: Could not authenticate.
+[30-Dec-2024 21:07:56 America/Mexico_City] PHP Fatal error:  Uncaught Error: mysqli_stmt object is already closed in /home3/alanchat/garbrix.com/padel/api/insertAdWeb.php:72
+Stack trace:
+#0 /home3/alanchat/garbrix.com/padel/api/insertAdWeb.php(72): mysqli_stmt->close()
+#1 {main}
+  thrown in /home3/alanchat/garbrix.com/padel/api/insertAdWeb.php on line 72
