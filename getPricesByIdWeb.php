@@ -24,9 +24,11 @@ if ($method == 'POST') {
         $fixedPricesResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
 
-        // Query to fetch special prices (active = 2) but not select the prices before today
-        $sql = "SELECT a.id_platforms_fields_price, a.id_platforms, a.price, a.platforms_fields_price_start_time, a.platforms_fields_price_end_time, a.active 
+        // Query to fetch special prices (active = 2) and join with platforms_fields
+        $sql = "SELECT a.id_platforms_fields_price, a.id_platforms, a.price, a.platforms_fields_price_start_time, a.platforms_fields_price_end_time, a.active, 
+                       b.id_platforms_field, b.id_platform, b.title, b.active as field_active
                 FROM platforms_fields_prices as a
+                JOIN platforms_fields as b ON a.id_platforms_field = b.id_platforms_field
                 WHERE a.id_platforms = ? AND a.active = 2 AND a.platforms_fields_price_start_time >= CURDATE()";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $id_platforms);
