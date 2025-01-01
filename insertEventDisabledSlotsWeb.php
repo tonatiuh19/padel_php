@@ -9,39 +9,40 @@ if ($method == 'POST') {
     $requestBody = file_get_contents('php://input');
     $params = json_decode($requestBody, true);
 
-    if (isset($params['id_platforms_disabled_date']) && isset($params['id_platforms']) && isset($params['start_date']) && isset($params['end_date'])) {
-        $id_platforms_disabled_date = $params['id_platforms_disabled_date'];
-        $id_platforms = $params['id_platforms'];
+    if (isset($params['id_platforms_field']) && isset($params['active']) && isset($params['start_date']) && isset($params['end_date']) && isset($params['id_platforms']) && isset($params['price']) && isset($params['platforms_fields_price_start_time']) && isset($params['platforms_fields_price_end_time'])) {
+        $id_platforms_field = $params['id_platforms_field'];
+        $active = $params['active'];
         $start_date = $params['start_date'] . ' 00:00:00';
         $end_date = $params['end_date'] . ' 23:59:59';
+        $id_platforms = $params['id_platforms'];
+        $now = date("Y-m-d H:i:s");
+
+        $start_date_time = $params['start_date_time'];
+        $end_date_time = $params['end_date_time'];
+
+        $price = $params['price'];
+        $platforms_fields_price_start_time = $params['platforms_fields_price_start_time'];
+        $platforms_fields_price_end_time = $params['platforms_fields_price_end_time'];
 
         $conn->begin_transaction();
 
         try {
-            // Get the active status from platforms_disabled_dates table
-            $sql = "SELECT active FROM platforms_disabled_dates WHERE id_platforms_disabled_date = ?";
+            // Insert the disabled slot into the database
+            $sql = "INSERT INTO platforms_disabled_dates (id_platforms_field, start_date_time, end_date_time, active) 
+                    VALUES (?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("i", $id_platforms_disabled_date);
+            $stmt->bind_param("issi", $id_platforms_field, $start_date_time, $end_date_time, $active);
             $stmt->execute();
-            $stmt->bind_result($active);
-            $stmt->fetch();
+            $id_platforms_disabled_date = $stmt->insert_id;
             $stmt->close();
 
-            // Delete the record from the platforms_disabled_dates table
-            $sql = "DELETE FROM `platforms_disabled_dates` WHERE `id_platforms_disabled_date` = ?";
+            // Insert the new price entry
+            $sql = "INSERT INTO platforms_fields_prices (id_platforms, id_platforms_field, price, platforms_fields_price_start_time, platforms_fields_price_end_time, active, id_platforms_disabled_date) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("i", $id_platforms_disabled_date);
+            $stmt->bind_param("iisssii", $id_platforms, $id_platforms_field, $price, $platforms_fields_price_start_time, $platforms_fields_price_end_time, $active, $id_platforms_disabled_date);
             $stmt->execute();
             $stmt->close();
-
-            if ($active == 3) {
-                // Delete the record from the platforms_fields_prices table
-                $sql = "DELETE FROM `platforms_fields_prices` WHERE `id_platforms_disabled_date` = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $id_platforms_disabled_date);
-                $stmt->execute();
-                $stmt->close();
-            }
 
             $conn->commit();
 
@@ -88,10 +89,10 @@ if ($method == 'POST') {
                     'activeOpacity' => 0,
                     'id_platforms_disabled_date' => $date['id_platforms_disabled_date'],
                     'id_platforms_field' => $date['id_platforms_field'],
-                    'title' => $date['title'],
                     'start_date_time' => $date['start_date_time'],
                     'end_date_time' => $date['end_date_time'],
-                    'active' => $date['active']
+                    'active' => $date['active'],
+                    'title' => $date['title']
                 ];
             }
 
@@ -104,7 +105,7 @@ if ($method == 'POST') {
             echo json_encode($response);
         } catch (Exception $e) {
             $conn->rollback();
-            echo json_encode(["message" => "Failed to delete data: " . $e->getMessage()]);
+            echo json_encode(["message" => "Failed to insert data: " . $e->getMessage()]);
         }
     } else {
         echo json_encode(["message" => "Invalid input data"]);
