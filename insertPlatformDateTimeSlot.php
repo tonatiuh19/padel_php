@@ -21,10 +21,12 @@ if ($method == 'POST') {
         $endDateTime->modify('+1 hour 30 minutes');
         $platforms_date_time_end = $endDateTime->format('Y-m-d H:i:s');
 
+        $platforms_date_time_inserted = (new DateTime())->format('Y-m-d H:i:s');
+
         // Insert data into the database
-        $sql = "INSERT INTO `platforms_date_time_slots`(`id_platforms_field`, `platforms_date_time_start`, `platforms_date_time_end`, `active`, `id_platforms_user`) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `platforms_date_time_slots`(`id_platforms_field`, `platforms_date_time_start`, `platforms_date_time_end`, `active`, `id_platforms_user`, `platforms_date_time_inserted`) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("issii", $id_platforms_field, $platforms_date_time_start, $platforms_date_time_end, $active, $id_platforms_user);
+        $stmt->bind_param("isssis", $id_platforms_field, $platforms_date_time_start, $platforms_date_time_end, $active, $id_platforms_user, $platforms_date_time_inserted);
 
         if ($stmt->execute()) {
             // Fetch the inserted data
