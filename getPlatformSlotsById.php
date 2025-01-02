@@ -14,6 +14,10 @@ if ($method == 'POST') {
         $id_platforms_field = $params['id_platforms_field'];
         $date = $params['date'];
 
+        $cleanupSql = "DELETE FROM platforms_date_time_slots 
+        WHERE active = 2 AND platforms_date_time_inserted < NOW() - INTERVAL 3 MINUTE";
+        $conn->query($cleanupSql);
+
         // Fetch platform field details
         $sql = "SELECT id_platforms_field, id_platform, title, active FROM platforms_fields WHERE id_platforms_field = ?";
         $stmt = $conn->prepare($sql);
