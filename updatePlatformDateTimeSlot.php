@@ -12,16 +12,23 @@ if ($method == 'POST') {
     if (isset($params['id_platforms_date_time_slot']) && isset($params['active'])) {
         $id_platforms_date_time_slot = $params['id_platforms_date_time_slot'];
         $active = $params['active'];
+        $stripe_id = isset($params['stripe_id']) ? $params['stripe_id'] : null;
 
-        // Update the active column in the database
-        $sql = "UPDATE `platforms_date_time_slots` SET `active` = ? WHERE `id_platforms_date_time_slot` = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $active, $id_platforms_date_time_slot);
+        // Update the active column and optionally the stripe_id in the database
+        if ($stripe_id) {
+            $sql = "UPDATE `platforms_date_time_slots` SET `active` = ?, `stripe_id` = ? WHERE `id_platforms_date_time_slot` = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("isi", $active, $stripe_id, $id_platforms_date_time_slot);
+        } else {
+            $sql = "UPDATE `platforms_date_time_slots` SET `active` = ? WHERE `id_platforms_date_time_slot` = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ii", $active, $id_platforms_date_time_slot);
+        }
 
         if ($stmt->execute()) {
             // Fetch all data from the table
             $stmt->close();
-            $sql = "SELECT id_platforms_date_time_slot, id_platforms_field, platforms_date_time_start, platforms_date_time_end, active 
+            $sql = "SELECT id_platforms_date_time_slot, id_platforms_field, platforms_date_time_start, platforms_date_time_end, active, stripe_id 
                     FROM platforms_date_time_slots";
             $result = $conn->query($sql);
 

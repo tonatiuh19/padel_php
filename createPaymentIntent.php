@@ -13,6 +13,7 @@ if ($method == 'POST') {
     $data = json_decode($input, true);
 
     $amount = $data['amount'];
+    $customerId = isset($data['customer_id']) ? $data['customer_id'] : null;
 
     // Query to get the API key from the database
     $sql = "SELECT a.key_string 
@@ -28,10 +29,16 @@ if ($method == 'POST') {
         \Stripe\Stripe::setApiKey($apiKey); // Set the Stripe API key from the database
 
         try {
-            $paymentIntent = \Stripe\PaymentIntent::create([
+            $paymentIntentData = [
                 'amount' => $amount,
                 'currency' => 'mxn',
-            ]);
+            ];
+
+            if ($customerId) {
+                $paymentIntentData['customer'] = $customerId;
+            }
+
+            $paymentIntent = \Stripe\PaymentIntent::create($paymentIntentData);
 
             echo json_encode(['clientSecret' => $paymentIntent->client_secret]);
         } catch (Exception $e) {

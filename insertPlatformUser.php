@@ -51,37 +51,51 @@ if ($method == 'POST') {
 
         $phone_number_w_code = $phone_number_code . $phone_number;
 
-        // Create Stripe customer
-        $stripe = new StripeClient('sk_test_51QIiddAC7jSBO0hE9ZMm7BdWcDmOPorNoXvxsDk6DPeIAgGiZSVbSWIsqQ7cP1ZBl5sNGYMWAoJ5ISHxoePy7RD70007cw7HC4');
-        $customer = $stripe->customers->create([
-            'name' => $full_name,
-            'phone' => $phone_number_w_code,
-            'email' => $email
-        ]);
-        $stripe_id = $customer->id;
+        // Query to get the secret API key from the database
+        $sql = "SELECT a.key_string 
+                FROM platforms_keys as a
+                INNER JOIN platforms_environments as b on b.type = a.title AND b.test = a.test
+                WHERE a.type = 'secret'";
+        $result = $conn->query($sql);
 
-        // Insert data into platforms_users
-        $sql = "INSERT INTO `platforms_users`(`full_name`, `age`, `date_of_birth`, `phone_number_code`, `phone_number`, `email`, `stripe_id`, `type`, `date_created`, `id_platforms`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sisssssssi", $full_name, $age, $date_of_birth, $phone_number_code, $phone_number, $email, $stripe_id, $type, $date_created, $id_platforms);
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $secretKey = $row['key_string'];
 
-        if ($stmt->execute()) {
-            $id_platforms_user = $stmt->insert_id;
-            $stmt->close();
+            // Create Stripe customer
+            $stripe = new StripeClient($secretKey);
+            $customer = $stripe->customers->create([
+                'name' => $full_name,
+                'phone' => $phone_number_w_code,
+                'email' => $email
+            ]);
+            $stripe_id = $customer->id;
 
-            // Fetch and return the user data
-            $sql = "SELECT id_platforms_user, full_name, age, date_of_birth, email, phone_number, phone_number_code, stripe_id, type, date_created, id_platforms 
-                    FROM platforms_users 
-                    WHERE id_platforms_user = ?";
+            // Insert data into platforms_users
+            $sql = "INSERT INTO `platforms_users`(`full_name`, `age`, `date_of_birth`, `phone_number_code`, `phone_number`, `email`, `stripe_id`, `type`, `date_created`, `id_platforms`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("i", $id_platforms_user);
-            $stmt->execute();
-            $userData = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
+            $stmt->bind_param("sisssssssi", $full_name, $age, $date_of_birth, $phone_number_code, $phone_number, $email, $stripe_id, $type, $date_created, $id_platforms);
 
-            echo json_encode($userData);
+            if ($stmt->execute()) {
+                $id_platforms_user = $stmt->insert_id;
+                $stmt->close();
+
+                // Fetch and return the user data
+                $sql = "SELECT id_platforms_user, full_name, age, date_of_birth, email, phone_number, phone_number_code, stripe_id, type, date_created, id_platforms 
+                        FROM platforms_users 
+                        WHERE id_platforms_user = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $id_platforms_user);
+                $stmt->execute();
+                $userData = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+
+                echo json_encode($userData);
+            } else {
+                echo json_encode(false);
+            }
         } else {
-            echo json_encode(false);
+            echo json_encode(['error' => 'API key not found']);
         }
     } else {
         echo json_encode(false);
@@ -91,3 +105,4 @@ if ($method == 'POST') {
 }
 
 $conn->close();
+?>
