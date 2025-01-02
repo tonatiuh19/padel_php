@@ -4,22 +4,45 @@ header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
 
 require_once('vendor/autoload.php');
+require_once('db_cnn/cnn.php'); // Include your database connection
 
-\Stripe\Stripe::setApiKey('sk_test_51QIiddAC7jSBO0hE9ZMm7BdWcDmOPorNoXvxsDk6DPeIAgGiZSVbSWIsqQ7cP1ZBl5sNGYMWAoJ5ISHxoePy7RD70007cw7HC4'); // Replace with your actual secret key
+$method = $_SERVER['REQUEST_METHOD'];
 
-$input = file_get_contents('php://input');
-$data = json_decode($input, true);
+if ($method == 'POST') {
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
 
-$amount = $data['amount'];
+    $amount = $data['amount'];
 
-try {
-    $paymentIntent = \Stripe\PaymentIntent::create([
-        'amount' => $amount,
-        'currency' => 'mxn',
-    ]);
+    // Query to get the API key from the database
+    $sql = "SELECT a.key_string 
+            FROM platforms_keys as a
+            INNER JOIN platforms_environments as b on b.type = a.title AND b.test = a.test
+            WHERE a.type = 'secret'";
+    $result = $conn->query($sql);
 
-    echo json_encode(['clientSecret' => $paymentIntent->client_secret]);
-} catch (Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $apiKey = $row['key_string'];
+
+        \Stripe\Stripe::setApiKey($apiKey); // Set the Stripe API key from the database
+
+        try {
+            $paymentIntent = \Stripe\PaymentIntent::create([
+                'amount' => $amount,
+                'currency' => 'mxn',
+            ]);
+
+            echo json_encode(['clientSecret' => $paymentIntent->client_secret]);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    } else {
+        echo json_encode(['error' => 'API key not found']);
+    }
+
+    $conn->close();
+} else {
+    echo json_encode(['message' => 'Invalid request method']);
 }
 ?>
