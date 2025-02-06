@@ -16,6 +16,27 @@ if ($method == 'POST') {
         $id_platforms = $params['id_platforms'];
         $code = $params['code'];
 
+        // Fetch the user's type from platforms_users
+        $sql = "SELECT type FROM platforms_users WHERE id_platforms_user = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id_platforms_user);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $userData = $result->fetch_assoc();
+            $user_type = $userData['type'];
+        } else {
+            echo json_encode(false);
+            exit;
+        }
+        $stmt->close();
+
+        // Bypass validation if user type is 3
+        if ($user_type == 3) {
+            echo json_encode(true);
+            exit;
+        }
+
         // Fetch the session code from platforms_users_sessions
         $sql = "SELECT code FROM platforms_users_sessions WHERE id_platforms_user = ?";
         $stmt = $conn->prepare($sql);
