@@ -27,7 +27,7 @@ if ($method == 'POST') {
             $id_platforms_user = $user['id_platforms_user'];
             $stmt->close();
 
-            $sql = "SELECT id_platforms_user, full_name, age, date_of_birth, email, phone_number, phone_number_code, stripe_id, type, date_created, id_platforms 
+            $sql = "SELECT id_platforms_user, full_name, age, date_of_birth, email, phone_number, phone_number_code, stripe_id, type, date_created, id_platforms, active 
                     FROM platforms_users 
                     WHERE id_platforms_user = ?";
             $stmt = $conn->prepare($sql);
