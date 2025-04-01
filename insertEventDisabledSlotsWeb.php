@@ -48,6 +48,26 @@ if ($method == 'POST') {
 
             $conn->commit();
 
+            // If active = 4, return the specified query result
+            if ($active == 4) {
+                $sql = "SELECT a.id_platforms_disabled_date, a.start_date_time, a.end_date_time, a.active, b.title, b.id_platforms_field, a.title as 'event_title', a.type, c.price
+                        FROM platforms_disabled_dates as a
+                        INNER JOIN platforms_fields as b on b.id_platforms_field = a.id_platforms_field
+                        INNER JOIN platforms_fields_prices as c on c.id_platforms_disabled_date = a.id_platforms_disabled_date
+                        WHERE b.id_platform = ? AND a.active = 4";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $id_platforms);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                $classes = $result->fetch_all(MYSQLI_ASSOC);
+                $stmt->close();
+
+                // Return the array of classes directly
+                echo json_encode($classes);
+                return;
+            }
+
             // Query to fetch data with the specified filters
             $sql = "SELECT a.id_platforms_date_time_slot, a.id_platforms_field, a.id_platforms_user, a.platforms_date_time_start, a.platforms_date_time_end, a.active, a.validated, b.full_name, b.date_of_birth, b.email, c.title
                     FROM platforms_date_time_slots as a
