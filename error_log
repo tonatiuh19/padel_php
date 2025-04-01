@@ -1,4 +1,5 @@
-[05-Feb-2025 21:07:38 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined function getPrice() in /home3/alanchat/garbrix.com/padel/api/updatePlatformDateTimeSlot.php:1437
+[04-Mar-2025 23:56:26 America/Mexico_City] PHP Fatal error:  Uncaught Error: mysqli_stmt object is already closed in /home3/alanchat/garbrix.com/padel/api/updatePlatformDateTimeSlot.php:1420
 Stack trace:
-#0 {main}
-  thrown in /home3/alanchat/garbrix.com/padel/api/updatePlatformDateTimeSlot.php on line 1437
+#0 /home3/alanchat/garbrix.com/padel/api/updatePlatformDateTimeSlot.php(1420): mysqli_stmt->close()
+#1 {main}
+  thrown in /home3/alanchat/garbrix.com/padel/api/updatePlatformDateTimeSlot.php on line 1420

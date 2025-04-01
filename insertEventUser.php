@@ -1420,6 +1420,11 @@ if ($method == 'POST') {
             if ($data) {
                 echo json_encode($data);
 
+                $sql = "UPDATE `platforms_fields_events_users` SET `price` = ? WHERE `id_platforms_fields_events_users` = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("di", $params['priceTotal'], $insertedId);
+                $stmt->execute();
+
                 // Fetch additional data for the email
                 $sql = "SELECT p.title, c.email, a.id_platforms_fields_events_users, a.id_platforms_user, a.id_platforms_disabled_date, p.id_platform, r.start_date_time, r.end_date_time, b.title as 'cancha' FROM platforms_fields_events_users as a JOIN platforms_disabled_dates as r on r.id_platforms_disabled_date=a.id_platforms_disabled_date JOIN platforms_fields as b on b.id_platforms_field= r.id_platforms_field JOIN platforms as p on p.id_platform=b.id_platform JOIN platforms_users as c on c.id_platforms_user=a.id_platforms_user WHERE a.id_platforms_fields_events_users= ?";
                 $stmt = $conn->prepare($sql);

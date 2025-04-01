@@ -18,7 +18,7 @@ if ($method == 'POST') {
         $email = $params['email'];
 
         // Fetch id_platforms_user from platforms_users by email
-        $sql = "SELECT id_platforms_user FROM platforms_users WHERE email = ?";
+        $sql = "SELECT id_platforms_user FROM platforms_users WHERE type=2 AND email = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $email);
         $stmt->execute();

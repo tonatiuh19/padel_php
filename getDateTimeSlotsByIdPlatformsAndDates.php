@@ -39,7 +39,7 @@ if ($method == 'POST') {
         $stmt->close();
 
         // Query to fetch marked dates with the specified filters
-        $sql = "SELECT a.id_platforms_disabled_date, a.start_date_time, a.end_date_time, a.active, b.title, b.id_platforms_field
+        $sql = "SELECT a.id_platforms_disabled_date, a.start_date_time, a.end_date_time, a.active, b.title, b.id_platforms_field, a.title as 'event_title', a.type
                 FROM platforms_disabled_dates as a
                 INNER JOIN platforms_fields as b on b.id_platforms_field = a.id_platforms_field
                 WHERE b.id_platform = ? AND a.start_date_time BETWEEN ? AND ?";
@@ -64,7 +64,9 @@ if ($method == 'POST') {
                 'start_date_time' => $date['start_date_time'],
                 'end_date_time' => $date['end_date_time'],
                 'active' => $date['active'],
-                'title' => $date['title']
+                'title' => $date['title'],
+                'event_title' => $date['event_title'],
+                'type' => $date['type'],
             ];
         }
 

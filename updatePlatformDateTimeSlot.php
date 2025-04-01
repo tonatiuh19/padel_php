@@ -1415,6 +1415,14 @@ if ($method == 'POST') {
                 $allData = $result->fetch_all(MYSQLI_ASSOC);
                 echo json_encode($allData);
 
+
+                if ($active == 1) {
+                  $sql = "UPDATE `platforms_date_time_slots` SET `price` = ? WHERE `id_platforms_date_time_slot` = ?";
+                  $stmt = $conn->prepare($sql);
+                  $stmt->bind_param("di", $params['priceTotal'], $id_platforms_date_time_slot);
+                  $stmt->execute();
+                }
+
                 // Send confirmation email if active is 1
                 if ($active == 1) {
                     // Fetch additional data for the email
