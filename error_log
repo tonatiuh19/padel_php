@@ -1,5 +1,5 @@
-[04-Mar-2025 23:56:26 America/Mexico_City] PHP Fatal error:  Uncaught Error: mysqli_stmt object is already closed in /home3/alanchat/garbrix.com/padel/api/updatePlatformDateTimeSlot.php:1420
+[08-Apr-2025 17:30:34 America/Mexico_City] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 's.id_platforms_field' in 'field list' in /home3/alanchat/garbrix.com/padel/api/updatePlatformFieldClassUserById.php:1422
 Stack trace:
-#0 /home3/alanchat/garbrix.com/padel/api/updatePlatformDateTimeSlot.php(1420): mysqli_stmt->close()
+#0 /home3/alanchat/garbrix.com/padel/api/updatePlatformFieldClassUserById.php(1422): mysqli->prepare('SELECT p.title,...')
 #1 {main}
-  thrown in /home3/alanchat/garbrix.com/padel/api/updatePlatformDateTimeSlot.php on line 1420
+  thrown in /home3/alanchat/garbrix.com/padel/api/updatePlatformFieldClassUserById.php on line 1422

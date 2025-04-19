@@ -13,7 +13,9 @@ if ($method == 'POST') {
         $date = $params['date'];
         $id_platforms_field = $params['id_platforms_field'];
 
-        // Query to get disabled slots for the specified date
+        $disabledSlots = [];
+
+        // Query to get reserved slots from platforms_date_time_slots
         $sql = "SELECT platforms_date_time_start 
                 FROM platforms_date_time_slots 
                 WHERE DATE(platforms_date_time_start) = ? AND id_platforms_field = ? AND active IN (1, 2)";
@@ -22,7 +24,24 @@ if ($method == 'POST') {
         $stmt->execute();
         $result = $stmt->get_result();
 
-        $disabledSlots = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $time = explode(' ', $row['platforms_date_time_start'])[1];
+                $disabledSlots[] = $time;
+            }
+        }
+        $stmt->close();
+
+        // Query to get reserved slots from platforms_fields_classes_users
+        $sql = "SELECT a.platforms_date_time_start 
+                FROM platforms_fields_classes_users as a
+                INNER JOIN platforms_disabled_dates as b on b.id_platforms_disabled_date=a.id_platforms_disabled_date
+                WHERE DATE(a.platforms_date_time_start) = ? AND b.id_platforms_field = ? AND a.active IN (1, 2)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("si", $date, $id_platforms_field);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $time = explode(' ', $row['platforms_date_time_start'])[1];
@@ -54,7 +73,6 @@ if ($method == 'POST') {
                 }
             }
         }
-
         $stmt->close();
 
         echo json_encode($disabledSlots);

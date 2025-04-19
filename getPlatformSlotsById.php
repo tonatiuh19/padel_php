@@ -58,8 +58,30 @@ if ($method == 'POST') {
             $markedDatesResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             $stmt->close();
 
+            $sql = "SELECT a.id_platforms_fields_classes_users, b.id_platforms_field, a.platforms_date_time_start, a.platforms_date_time_end, a.active
+                    FROM platforms_fields_classes_users as a
+                    INNER JOIN platforms_disabled_dates as b on b.id_platforms_disabled_date = a.id_platforms_disabled_date
+                    WHERE b.id_platforms_field = ? AND DATE(a.platforms_date_time_start) = ? 
+                    ORDER BY a.platforms_date_time_start ASC";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("is", $id_platforms_field, $date);
+            $stmt->execute();
+            $classesResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+            $activeClasses = [];
+            $idleClasses = [];
+            foreach ($classesResult as $slot) {
+                if ($slot['active'] == 1) {
+                    $activeClasses[] = $slot;
+                } elseif ($slot['active'] == 2) {
+                    $idleClasses[] = $slot;
+                }
+            }
+
             // Generate slots
             $slots = generateDatesArray($now, array_merge($activeSlots, $idleSlots));
+            $classes = generateDatesArray($now, array_merge($activeClasses, $idleClasses));
             $transformedMarkedDates = transformMarkedDates($markedDatesResult);
 
             // Structure the response
@@ -69,7 +91,8 @@ if ($method == 'POST') {
                 'today' => $now,
                 'fullToday' => date("Y-m-d H:i:s"),
                 'markedDates' => $transformedMarkedDates,
-                'slots' => $slots
+                'slots' => $slots,
+                'classes' => $classes,
             ];
 
             $res = json_encode($response, JSON_NUMERIC_CHECK);
